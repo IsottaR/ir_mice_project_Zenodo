@@ -12,45 +12,37 @@ clc
 
 %add fieldtrip path
 addpath('C:\Users\IRIO\Desktop\Matlab toolbox\fieldtrip-master\fieldtrip-master');
-addpath('func')
+addpath('H:\PROJECTS_GIT\ir_mice_project_Zenodo\func')
 ft_defaults
 
 %% variable initialisation
-path='H:\Isotta\DATA\ir_mice_project\RS\';
-BIDSfolder='H:\Isotta\DATA\ir_mice_project\RS\dataset';
-% task='task-rest';
-task='task-GS';
+BIDSfolder='H:\Isotta\DATA\ir_mice_project\RS\data2publish';
+task='task-rest';
 
-%define animal ID and path2data
-if strcmp(task,'task-rest')
-    subj=[1:33];%animal ID
-    path2data=BIDSfolder;
-elseif strcmp(task,'task-GS')
-    subj=[12 13 15:20 22:33];%animal ID
-    path2data=fullfile(BIDSfolder,'derivatives','eeg_pre_preprocessing_GS');
-end
+%list of animals 2 analyse
+cnt=dir(BIDSfolder);
 
 fs=4000; %sampling frequency
 
 % prepare electrodes and neighbours for interpolation
-load('H:\Isotta\DATA\ir_mice_project\RS\dataset\derivatives\elec_layout\elec_layout.mat'); %load elec layout
+load('H:\Isotta\DATA\ir_mice_project\RS\dataset\derivatives\elec_layout\elec_layout31.mat'); %load elec layout
 load('H:\Isotta\DATA\ir_mice_project\RS\dataset\derivatives\elec_layout\elec_neigh.mat'); %load elec neighbours
 
 %% PREPROCESSING -fieldtrip-
-for s=1:length(subj) %we don't have Laurent's data yet
-    sub_id=subj(s);
+for s=4:size(cnt,1) 
+    sub_id=cnt(s).name;
     
     %list the sessions you have for each subj
-    cnt=dir(fullfile(path2data,['sub-',sprintf('%02d',sub_id)]));
+    cnt_ses=dir(fullfile(BIDSfolder,sub_id));
     
     %preprocess the data in each session
-    for ses_idx=3:length(cnt)
+    for ses_idx=3:length(cnt_ses)
         clearvars epoch_data data_tmp dataDown datFilt dataReRef dataFinal dataPreProc
         %session ID
-        ses_id=cnt(ses_idx).name;
+        ses_id=cnt_ses(ses_idx).name;
         
-        raw_data_filename=fullfile(path2data,['sub-',sprintf('%02d',sub_id)],ses_id,'eeg',...
-            ['sub-',sprintf('%02d',sub_id),'_',ses_id,'_',task,'_eeg.mat']);
+        raw_data_filename=fullfile(BIDSfolder,sub_id,ses_id,'eeg',...
+            [sub_id,'_',ses_id,'_',task,'_eeg.mat']);
         
         if ~exist(raw_data_filename)
             continue
@@ -59,24 +51,21 @@ for s=1:length(subj) %we don't have Laurent's data yet
             load(raw_data_filename);
             
             %START THE PREPROCESSING------------------------
-            if strcmp(task,'task-rest') %only rest data needs to be converted to FT
-                %convert data to FT format
-                for iep = 1:size(epoch_data,3)
-                    data_tmp.trial{1,iep}=squeeze(epoch_data(:,:,iep));
-                    data_tmp.time{1,iep}=0: 1/fs: size(data_tmp.trial{1,iep},2)/fs-1/fs;
-                end
-                data_tmp.fsample=fs;
-                data_tmp.label=elec.label;
-                data_tmp.dimord='chan_time';
-                data_tmp.elec=elec;
-                data=ft_preprocessing([], data_tmp);
+            %convert data to FT format
+            for iep = 1:size(epoch_data,3)
+                data_tmp.trial{1,iep}=squeeze(epoch_data(:,:,iep));
+                data_tmp.time{1,iep}=0: 1/fs: size(data_tmp.trial{1,iep},2)/fs-1/fs;
             end
-            if ismember(subj(s),28:33)
-                %subtract channel 31 form the rest of the data -->now all data are
-                %the same
-                %(Guru's mice and some of Laurent's mice are already avg reref in ch 31;
-                %the remaining Laurent's mice are not reref and ch 31 is set to zero)
-                %it won't change Guru's data, but it will change Laurent's data
+            data_tmp.fsample=fs;
+            data_tmp.label=elec.label;
+            data_tmp.dimord='chan_time';
+            data_tmp.elec=elec;
+            data=ft_preprocessing([], data_tmp);
+            
+            if ismember(str2num(sub_id(5:end)),28:33)
+                %these animals were avg re-referenced to channel 31, so subtract 
+                %channel 31 form the rest of the data -->now all data are the same
+                
                 cfg=[];
                 cfg.reref='yes';
                 cfg.refchannel=data.label{31, 1};
@@ -142,8 +131,8 @@ for s=1:length(subj) %we don't have Laurent's data yet
             
             %store results in derivatives
             %define final name and folder
-            final_folder=fullfile(BIDSfolder,'derivatives','eeg_preprocessing',['sub-',sprintf('%02d',sub_id)],ses_id,'eeg');
-            final_filename=['sub-',sprintf('%02d',sub_id),'_',ses_id,'_',task,'_eeg'];
+            final_folder=fullfile(BIDSfolder,'derivatives','eeg_preprocessing',sub_id,ses_id,'eeg');
+            final_filename=[sub_id,'_',ses_id,'_',task,'_eeg'];
             if ~exist(final_folder)
                 mkdir(final_folder)
             end
@@ -151,34 +140,10 @@ for s=1:length(subj) %we don't have Laurent's data yet
             save(fullfile(final_folder,final_filename),'dataPreProc');
             clear dataPreProc
         end
-        %         %-------------------------- z score data and store ----------------
-        %         %Convert data to matrix
-        %         for ep=1:size(dataFinal.trial,2)
-        %             dat(:,:,ep)=dataFinal.trial{1,ep};
-        %         end
-        %         %zscore the data along time
-        %         dat_zscored=zscore(dat,0,2);
-        %
-        %         %Convert back to fieldtrip format
-        %         for ep = 1:size(dataFinal.trial,2)
-        %             dataFinal.trial{1,ep}=squeeze(dat_zscored(:,:,ep));
-        %         end
-        %
-        %         %save final result
-        %         dataPreProc=dataFinal;
-        %
-        %         %store results in derivatives
-        %         %define final name and folder
-        %         final_folder=fullfile(BIDSfolder,'derivatives','eeg_preprocessing_zscore',['sub-',sprintf('%02d',sub_id)],ses_id,'eeg');
-        %         final_filename=['sub-',sprintf('%02d',sub_id),'_',ses_id,'_',task,'_eeg'];
-        %         if ~exist(final_folder)
-        %             mkdir(final_folder)
-        %         end
-        %         %save in BIDS
-        %         save(fullfile(final_folder,final_filename),'dataPreProc');
     end
 end
-%%
+
+%% check if any channel was removed from any animal
 for r=1:size(msg,1)
     for c=1:size(msg,2)
         if ~isempty(msg{r,c})
