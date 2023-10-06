@@ -2,6 +2,8 @@
 %  ~ EEG and Epilepsy Unit- Geneva HUG
 %repeat analyses of script C_network analyses on the average connectomes 
 
+% -------> change path at line 12 and 18
+
 clear all
 close all
 clc

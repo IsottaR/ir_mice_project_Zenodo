@@ -1,5 +1,9 @@
 %% Isotta Rigoni
 %  ~ EEG and Epilepsy Unit- Geneva HUG
+%This code calculates graph measures on the WPLI connectivity matrices
+% as described in the paragraph "Graph analyses"
+
+% -------> change path at line 13 and 16
 
 clear all
 close all

@@ -1,11 +1,23 @@
 %% Isotta Rigoni
 %  ~ EEG and Epilepsy Unit- Geneva HUG
+
+%With this script, you can run the statistical analyses between:
+% - graph measures at day 0 vs day 28 (group A)
+% - graph measures at day 28 vs day 29(group B)
+
+%The analyses are run for GLOBAL (GE, GCC and LI), 
+%HEMISPHERIC (HCC and HE, ipsilateral and contralateral) 
+% and NODAL measures (NE and CC). The LI is also compared 
+%with a zero-mean distribution (line 203)
+
+% -------> change path at line 21 and 33
+
 clear all
 close all
 clc
 
 %add path
-addpath('H:\PROJECTS_GIT\ir_mice_project_Zenodo\func')
+addpath('func')
 addpath('C:\Users\IRIO\Desktop\Matlab toolbox\fieldtrip-master\fieldtrip-master')
 ft_defaults
 
@@ -21,8 +33,8 @@ subj=[1:7 12 14:17 21:23 ]; %animal ID
 BIDSfolder='H:\Isotta\DATA\ir_mice_project\RS\data2publish\derivatives';
 task='task-rest';
 n_elec=30;
-var_labels={'GE','LI','avgCC','GE_L','GE_R','CC_R','CC_L'};%global and hemispheric measures
-var_labels2={'CC','NE'};%nodal measures
+var_labels_glob_hemisp={'GE','LI','avgCC','GE_L','GE_R','CC_R','CC_L'};%global and hemispheric measures
+var_labels_nodal={'CC','NE'};%nodal measures
 
 derivative_folder='wpli';
 
@@ -79,8 +91,8 @@ end
 %% -----------------compare GLOBAL and HEMISPHERIC measures-----------------------
 %GE, LI, GE_L, GE_R avgCC CC_L CC_R
 %--> make Fig 3
-for v=1:length(var_labels)
-    eval(['var=',char(var_labels(v)),'_2_stat;']);
+for v=1:length(var_labels_glob_hemisp)
+    eval(['var=',char(var_labels_glob_hemisp(v)),'_2_stat;']);
     for b=1:5%size(band,2)
         p(b)=signrank(squeeze(var(2,:,b)), squeeze(var(1,:,b)));
     end
@@ -90,12 +102,12 @@ for v=1:length(var_labels)
     for b=1:5%size(band,2)
         if p(b)<.05
             diff=median(var(2,:,b))-median(var(1,:,b));
-            disp(['freq: ',char(band(b)),'; ',char(var_labels(v)),'(',char(day(2)),') - ',char(var_labels(v)),'(',char(day(1)),') = ',num2str(diff),'; p = ',num2str(p(b))])
+            disp(['freq: ',char(band(b)),'; ',char(var_labels_glob_hemisp(v)),'(',char(day(2)),') - ',char(var_labels_glob_hemisp(v)),'(',char(day(1)),') = ',num2str(diff),'; p = ',num2str(p(b))])
             %plot
             fig=scatter_box_plot(squeeze(var(1,:,b)),squeeze(var(2,:,b)),day);
-            title([char(var_labels(v)),'(',char(day(2)),') - ',char(var_labels(v)),'(',char(day(1)),') = ',num2str(diff),'; p = ',num2str(p(b))])
+            title([char(var_labels_glob_hemisp(v)),'(',char(day(2)),') - ',char(var_labels_glob_hemisp(v)),'(',char(day(1)),') = ',num2str(diff),'; p = ',num2str(p(b))])
             xlabel('time point')
-            ylabel([char(var_labels(v)), ' in ',char(band(b))])
+            ylabel([char(var_labels_glob_hemisp(v)), ' in ',char(band(b))])
         end
     end
 end
@@ -118,11 +130,11 @@ clear layout
 %load layout to PLOT (with mice head)
 load(fullfile(BIDSfolder, 'elec_layout','mouse_layout_modif.mat'))
 
-for v=1:length(var_labels2)
+for v=1:length(var_labels_nodal)
     clear p
     
-    eval(['var1=',char(var_labels2(v)),'_2_stat',char(day(1))]);
-    eval(['var2=',char(var_labels2(v)),'_2_stat',char(day(2))]);
+    eval(['var1=',char(var_labels_nodal(v)),'_2_stat',char(day(1))]);
+    eval(['var2=',char(var_labels_nodal(v)),'_2_stat',char(day(2))]);
     n_sub=size(var1.powspctrm,1);%nsub is the same ni both variable, it's a WHITHIN-SUB
     
     %calculate average difference between the two powspctrm
@@ -180,7 +192,7 @@ for v=1:length(var_labels2)
             fig=figure;
             ft_topoplotER(cfg, var);
             
-            title([char(var_labels2(v)),' in ',char(band(band2analyze(b)))]);
+            title([char(var_labels_nodal(v)),' in ',char(band(band2analyze(b)))]);
             ft_hastoolbox('brewermap', 1);         % ensure this toolbox is on the path
             colormap(flipud(brewermap(64,'RdBu'))) % change the colormap
             colorbar

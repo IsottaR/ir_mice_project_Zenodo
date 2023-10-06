@@ -1,7 +1,12 @@
 %% Isotta Rigoni
 %  ~ EEG and Epilepsy Unit- Geneva HUG
 
-%Calculate WPLI connectivity on epicranial eeg data
+%This code calculates WPLI connectivity on epicranial eeg data
+%For each animal and each session (d0, d28 and d29), we calculate one WPLI
+%matrix and then split it into frequency bands, as described in the
+%paragraph "Connectivity analyses"
+
+% -------> change path at line 16 and 21
 
 clear all
 close all

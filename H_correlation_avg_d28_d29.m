@@ -3,6 +3,8 @@
 % - AVERAGE number of seizures
 % - correlate average graph measures with average number of seizures
 
+% -------> change path at line 19
+
 clc
 clear
 close all
@@ -14,9 +16,8 @@ subj=[12 13 15:20 22:33]; %animal ID
 
 %% variable initialisation
 
-BIDSfolder='H:\Isotta\DATA\ir_mice_project\RS\data2publish\derivatives';
+BIDSfolder='H:\Isotta\DATA\ir_mice_project\RS\data2publish';
 task='task-rest';%
-derivative_folder='wpli';
 f_band_name=[ {'delta'}, {'lowTheta'},{'highTheta'} ,{'beta'} ,{'gamma'}, {'broadband'}];
 band2analyse=[2 3];
 var_labels={'LI','GE_R','CC_R'};%only the metrics (glob and hemi) that were significant
@@ -24,8 +25,8 @@ var_labels={'LI','GE_R','CC_R'};%only the metrics (glob and hemi) that were sign
 freq_band_freq=[1 4; 4 8; 8 12; 12 30; 30 40; 1 40];
 
 %% load EA info
-EAinfo28=readtable('H:\Isotta\DATA\ir_mice_project\RS\data2publish\EA_info.xlsx','Sheet','d28');
-EAinfo29=readtable('H:\Isotta\DATA\ir_mice_project\RS\data2publish\EA_info.xlsx','Sheet','d29');
+EAinfo28=readtable(fullfile(BIDSfolder,'EA_info.xlsx'),'Sheet','d28');
+EAinfo29=readtable(fullfile(BIDSfolder,'EA_info.xlsx'),'Sheet','d29');
 var2_labels=EAinfo28.Properties.VariableNames(2:8);
 
 %% load network measures at day 28
@@ -37,7 +38,7 @@ for s=1:length(subj)
     sub_id=subj(s);
     
     %---------------------- Load network data -------------------------
-    load(fullfile(BIDSfolder,'network_metrics_wpli',['sub-',sprintf('%02d',sub_id)],ses_id,'eeg',...
+    load(fullfile(BIDSfolder,'derivatives','network_metrics_wpli',['sub-',sprintf('%02d',sub_id)],ses_id,'eeg',...
         ['sub-',sprintf('%02d',sub_id),'_',ses_id,'_',task,'_network_metrics.mat']));
     
     %-----------global measures

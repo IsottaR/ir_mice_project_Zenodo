@@ -1,14 +1,15 @@
 %% Isotta Rigoni
 %  ~ EEG and Epilepsy Unit- Geneva HUG
-%AVERAGE CONNECTOMES BETWEEN DAY 28 AND 29
+
+%This script average connectomes between day 28 and day 29 (for each animal)
+%as described in the third paragraph of the section "Statistical analyses"
+
+% -------> change path at line 20
 
 clear all
 close all
 clc
 
-%add path
-addpath('C:\Users\IRIO\Desktop\PROJECTS\NeDepi\ieds\graph_signal_processing_functions')
-% ft_defaults
 
 %% variable initialisation
 %-----------------------------------------

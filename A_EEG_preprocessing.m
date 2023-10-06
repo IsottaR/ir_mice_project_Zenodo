@@ -1,22 +1,22 @@
 %% Isotta Rigoni
 %  ~ EEG and Epilepsy Unit- Geneva HUG
-% This code will calculate one connectivity matrix for each 
-% one-second-epoch, for each subject
+% This code will import epochs of raw Eepicranial EEG and preprocess them
+%The preprocessing is performed Fieldtrip and is described in the paragraph
+%"EEG recordings and analyses"
 
+% -------> change path at line 14 and 19
 
-%% you will need to remove ch 31 from the rest of the data before 
-%starting the preprocessing because some of Laurent's data were already average rereferenced!
 clear all
 close all
 clc
 
 %add fieldtrip path
 addpath('C:\Users\IRIO\Desktop\Matlab toolbox\fieldtrip-master\fieldtrip-master');
-addpath('H:\PROJECTS_GIT\ir_mice_project_Zenodo\func')
+addpath('func')
 ft_defaults
 
 %% variable initialisation
-BIDSfolder='H:\Isotta\DATA\ir_mice_project\RS\data2publish';
+BIDSfolder='H:\Isotta\DATA\ir_mice_project\RS\data2publish'; %insert your path to the data
 task='task-rest';
 
 %list of animals 2 analyse
@@ -24,9 +24,9 @@ cnt=dir(BIDSfolder);
 
 fs=4000; %sampling frequency
 
-% prepare electrodes and neighbours for interpolation
-load('H:\Isotta\DATA\ir_mice_project\RS\dataset\derivatives\elec_layout\elec_layout31.mat'); %load elec layout
-load('H:\Isotta\DATA\ir_mice_project\RS\dataset\derivatives\elec_layout\elec_neigh.mat'); %load elec neighbours
+% load electrodes and neighbours for interpolation
+load(fullfile(BIDSfolder,'derivatives\elec_layout\elec_layout31.mat')); %load elec layout
+load(fullfile(BIDSfolder,'derivatives\elec_layout\elec_neigh.mat')); %load elec neighbours
 
 %% PREPROCESSING -fieldtrip-
 for s=4:size(cnt,1) 
@@ -63,8 +63,8 @@ for s=4:size(cnt,1)
             data=ft_preprocessing([], data_tmp);
             
             if ismember(str2num(sub_id(5:end)),28:33)
-                %these animals were avg re-referenced to channel 31, so subtract 
-                %channel 31 form the rest of the data -->now all data are the same
+                %the raw data of these animals were avg re-referenced to 
+                %channel 31, so subtract channel 31-->now all data are the same
                 
                 cfg=[];
                 cfg.reref='yes';
