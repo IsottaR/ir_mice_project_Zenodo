@@ -76,20 +76,8 @@ for d=1:length(day)
 end
 
 
-%% do correlation analyses on CONNECTION VALUES (functional connectomes) -> make Fig 5.a
-for b=1:size(wpli_all,3)
-    for s=1:size(wpli_all,5)
-        clear curr_mat_x curr_mat_y var 1 var2
-        curr_mat_x=squeeze(wpli_all(:,:,b,1,s));%day28
-        curr_mat_y=squeeze(wpli_all(:,:,b,2,s));%day29
-        
-        %vectorize upper matrix
-        var1=curr_mat_x(triu(true(size(curr_mat_x)),1));
-        var2=curr_mat_y(triu(true(size(curr_mat_y)),1));
-        
-        [rho(s,b),pval(s,b)]=corr(var1,var2,'Type','Pearson')
-    end
-    
+%% do ICC analyses on CONNECTION VALUES (functional connectomes) -> make Fig 5.a
+for b=1:size(wpli_all,3)-1
     %average across animals
     clear curr_mat_x curr_mat_y var 1 var2
 
@@ -97,21 +85,26 @@ for b=1:size(wpli_all,3)
     curr_mat_y=mean(squeeze(wpli_all(:,:,b,2,:)),3);%day29
     
     %vectorize upper matrix
-    var1=curr_mat_x(triu(true(size(curr_mat_x)),1))
-    var2=curr_mat_y(triu(true(size(curr_mat_y)),1))
+    var1=curr_mat_x(triu(true(size(curr_mat_x)),1));
+    var2=curr_mat_y(triu(true(size(curr_mat_y)),1));
+        
+    %calculate the intra-class correlation coefficient
+    %--> ICC for AVERAGE measures
+    [r(b), LB(b), UB(b), F(b), df1(b), df2(b), p(b)] = ICC([var1 var2], 'A-k');
     
-    [rho_avg(b),pval_avg(b)]=corr(var1,var2,'Type','Pearson')
+    report_string=['ICC=',num2str(r(b)),'[',num2str(LB(b)),'-',num2str(UB(b)),'],F=',num2str(F(b)),'(',num2str(df1(b)),...
+        ',',num2str(df2(b)),'), p=',num2str(p(b)*(size(wpli_all,3)-1)) ];
     
-    fig=figure
+    %display reuslts
+    fig=figure;
     scatter(var1,var2)
-    hold on
-    fitL=polyfit(var1,var2,1);
-    plot(var1,polyval(fitL,var1),'k')
-    hold off
     xlabel(['avg ',char(f_band_name(b)),' FC, ',char(day(1))])
     
     ylabel(['avg ',char(f_band_name(b)),' FC, ',char(day(2))])
-    title(['rho: ',num2str(rho_avg(b)),' p:',num2str(pval_avg(b)*5)],'Interpreter','none') %Bonferroni-correct
+    title(report_string,'Interpreter','none') %Bonferroni-correct
+    
+    disp(['avg ',char(f_band_name(b)),' FC, ', report_string]);
+    
 end
 
 %% do correlation analyses on epileptic activities EA (saeizures etc.) -> make rest of Fig 5
@@ -120,17 +113,20 @@ for v=1:length(var_labels3)
     %---------------------- (metric28+metric29)/2 ----------------------
     eval(['var1=squeeze(measures2plot(1,:,v));']);%day 28
     eval(['var2=squeeze(measures2plot(2,:,v));']);%day 29
+        
+     %calculate the intra-class correlation coefficient
+    %--> ICC for SINGLE measures
+    [r, LB, UB, F, df1, df2, p] = ICC([var1; var2]', 'A-1');
+    report_string=['ICC=',num2str(r),'[',num2str(LB),'-',num2str(UB),'],F=',num2str(F),'(',num2str(df1),...
+        ',',num2str(df2),'), p=',num2str(p*(length(var_labels3))) ];
     
-    [rho_avg,pval_avg]=corr(var1',var2','Type','Pearson');
+    disp([char(var_labels3(v)),' , ', report_string])
     
-    fig=figure
+    fig=figure;
     scatter(var1,var2)
-    hold on
-    fitL=polyfit(var1,var2,1);
-    plot(var1,polyval(fitL,var1),'k')
-    hold off
     xlabel(char(day(1)), 'Interpreter', 'none')
     ylabel(char(day(2)), 'Interpreter', 'none')
-    title([char(var_labels3(v)), ' rho: ',num2str(rho_avg),' p:',num2str(pval_avg*(length(var_labels3)-1))],'Interpreter','none')%Bonferroni-correct for 7 tests (we do not test the interictal FR)
+    title(report_string,'Interpreter','none')%Bonferroni-correct for 7 tests (we do not test the interictal FR)
+
 end
 
