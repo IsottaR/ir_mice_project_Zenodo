@@ -5,7 +5,7 @@
 %bands) between day 28 and day 29 and in epileptic activities (EA). It runs
 %the analyses described in the second paragraph on the section "Statistical analyses"
 
-% -------> change path at line 20
+% -------> change path at line 21
 
 clear all
 close all
