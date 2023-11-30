@@ -111,7 +111,6 @@ for b=1:length(band2analyse)
     end
 end
 
-
 %% scatter plot (according to groups of animals) --> Fig 6
 
 % --------------- find which animals had seizures and define groups -------
@@ -150,7 +149,8 @@ for v=1:size(var1,2)
     legend('No iHPD','iHPD on one day','iHPD on both days')
 end
 xticklabels(lab)
-
+hold on
+yline(0,'r-.')
 % --------------- organize and plot the data (HE and HCC) -----------------
 %organize
 clear var_labels
