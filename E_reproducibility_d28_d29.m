@@ -11,6 +11,7 @@ clear all
 close all
 clc
 
+addpath('func')
 %% subject initialisation
 day={'d28' 'd29'}; %time points of observation
 subj=[12 13 15:20 22:33]; %animal ID
@@ -95,18 +96,17 @@ for b=1:size(wpli_all,3)-1
     report_string=['ICC=',num2str(r(b)),'[',num2str(LB(b)),'-',num2str(UB(b)),'],F=',num2str(F(b)),'(',num2str(df1(b)),...
         ',',num2str(df2(b)),'), p=',num2str(p(b)*(size(wpli_all,3)-1)) ];
     
-    %display reuslts
+    %display results
     fig=figure;
     scatter(var1,var2)
     xlabel(['avg ',char(f_band_name(b)),' FC, ',char(day(1))])
-    
     ylabel(['avg ',char(f_band_name(b)),' FC, ',char(day(2))])
     title(report_string,'Interpreter','none') %Bonferroni-correct
-    
     disp(['avg ',char(f_band_name(b)),' FC, ', report_string]);
     
 end
 
+clearvars r LB UB F df1 df2 p
 %% do correlation analyses on epileptic activities EA (saeizures etc.) -> make rest of Fig 5
 
 for v=1:length(var_labels3)
@@ -124,9 +124,10 @@ for v=1:length(var_labels3)
     
     fig=figure;
     scatter(var1,var2)
-    xlabel(char(day(1)), 'Interpreter', 'none')
-    ylabel(char(day(2)), 'Interpreter', 'none')
+    xlabel([char(var_labels3(v)),',',char(day(1))], 'Interpreter', 'none')
+    ylabel([char(var_labels3(v)),',',char(day(2))], 'Interpreter', 'none')
     title(report_string,'Interpreter','none')%Bonferroni-correct for 7 tests (we do not test the interictal FR)
 
+    clearvars r LB UB F df1 df2 p
 end
 
