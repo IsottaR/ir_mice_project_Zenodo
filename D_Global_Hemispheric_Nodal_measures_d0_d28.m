@@ -8,9 +8,9 @@
 %The analyses are run for GLOBAL (GE, GCC and LI), 
 %HEMISPHERIC (HCC and HE, ipsilateral and contralateral) 
 % and NODAL measures (NE and CC). The LI is also compared 
-%with a zero-mean distribution (line 203)
+%with a zero-mean distribution (line 210)
 
-% -------> change path at line 21 and 33
+% -------> change path at line 21 and 38
 
 clear all
 close all
@@ -23,8 +23,13 @@ ft_defaults
 
 %% variable initialisation
 %decide which group to compare
+%GROUP A:
+%-----------------------------------------
 day={'d0' 'd28'}; %time points of observation
 subj=[1:7 12 14:17 21:23 ]; %animal ID
+%-----------------------------------------
+
+%GROUP B
 %-----------------------------------------
 % day={'d28' 'd29'}; %time points of observation
 % subj=[12 13 15:20 22:33]; %animal ID
