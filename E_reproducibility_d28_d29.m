@@ -49,12 +49,6 @@ for s=1:length(subj)
         end
 end
 
-%% final folder
-final_folder=fullfile(BIDSfolder,'derivatives',['stats_',derivative_folder,'_reproducibility_d28d29']);
-if ~exist(final_folder)
-   mkdir(final_folder) 
-end
-
 %% load and organise connectomes 
 for d=1:length(day)
     %get network metric for each session: d0, d28 or d29
